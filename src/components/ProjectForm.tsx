@@ -4,20 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  category: string;
-  createdAt: string;
-  userId: string;
-}
+import { Project } from '../hooks/useProjects';
 
 interface ProjectFormProps {
-  onProjectAdded: (project: Project) => void;
+  onProjectAdded: (project: Omit<Project, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
   editingProject?: Project | null;
   onProjectUpdated?: (project: Project) => void;
   onCancel?: () => void;
@@ -39,18 +29,18 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     e.preventDefault();
     
     const projectData = {
-      id: editingProject?.id || Date.now().toString(),
       title,
       description,
       status,
       priority,
       category,
-      createdAt: editingProject?.createdAt || new Date().toISOString(),
-      userId: editingProject?.userId || '1'
     };
 
     if (editingProject && onProjectUpdated) {
-      onProjectUpdated(projectData);
+      onProjectUpdated({
+        ...editingProject,
+        ...projectData,
+      });
     } else {
       onProjectAdded(projectData);
     }

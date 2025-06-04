@@ -5,26 +5,39 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, AlertCircle } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const { login, register, loading } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     try {
+      let result;
       if (isLogin) {
-        await login(email, password);
+        result = await login(email, password);
       } else {
-        await register(email, password, name);
+        if (!name.trim()) {
+          setError('Name is required');
+          return;
+        }
+        result = await register(email, password, name);
+      }
+      
+      if (result.error) {
+        setError(result.error);
       }
     } catch (error) {
       console.error('Auth error:', error);
+      setError('An unexpected error occurred');
     }
   };
 
@@ -48,6 +61,13 @@ const Login: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <span className="text-red-700 dark:text-red-300 text-sm">{error}</span>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
@@ -86,6 +106,7 @@ const Login: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="bg-white/50 dark:bg-gray-700/50 border-white/20"
+                minLength={6}
               />
             </div>
             <Button
@@ -99,7 +120,10 @@ const Login: React.FC = () => {
           <div className="mt-4 text-center">
             <Button
               variant="link"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+              }}
               className="text-blue-600 dark:text-blue-400"
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}

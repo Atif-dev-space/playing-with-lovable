@@ -1,63 +1,41 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from './Navbar';
 import ProjectForm from './ProjectForm';
 import ProjectList from './ProjectList';
 import AdminDashboard from './AdminDashboard';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  category: string;
-  createdAt: string;
-  userId: string;
-}
+import { Card, CardContent } from '@/components/ui/card';
+import { useProjects } from '../hooks/useProjects';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState('projects');
-  const [projects, setProjects] = useState<Project[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  
+  const { projects, loading, addProject, updateProject, deleteProject } = useProjects();
 
-  // Load projects from localStorage on component mount
-  useEffect(() => {
-    const savedProjects = localStorage.getItem('projects');
-    if (savedProjects) {
-      setProjects(JSON.parse(savedProjects));
-    }
-  }, []);
-
-  // Save projects to localStorage whenever projects change
-  useEffect(() => {
-    localStorage.setItem('projects', JSON.stringify(projects));
-  }, [projects]);
-
-  const handleProjectAdded = (project: Project) => {
-    setProjects([...projects, project]);
+  const handleProjectAdded = async (projectData: any) => {
+    await addProject(projectData);
     setShowForm(false);
   };
 
-  const handleProjectUpdated = (updatedProject: Project) => {
-    setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p));
+  const handleProjectUpdated = async (updatedProject: any) => {
+    await updateProject(updatedProject.id, updatedProject);
     setEditingProject(null);
     setShowForm(false);
   };
 
-  const handleEdit = (project: Project) => {
+  const handleEdit = (project: any) => {
     setEditingProject(project);
     setShowForm(true);
   };
 
-  const handleDelete = (projectId: string) => {
+  const handleDelete = async (projectId: string) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
-      setProjects(projects.filter(p => p.id !== projectId));
+      await deleteProject(projectId);
     }
   };
 
@@ -66,7 +44,8 @@ const Dashboard: React.FC = () => {
     setShowForm(false);
   };
 
-  const userProjects = user?.role === 'admin' ? projects : projects.filter(p => p.userId === user?.id);
+  // Filter projects based on user role
+  const userProjects = user?.role === 'admin' ? projects : projects.filter(p => p.user_id === user?.id);
 
   const renderContent = () => {
     if (currentPage === 'admin' && user?.role === 'admin') {
@@ -76,7 +55,16 @@ const Dashboard: React.FC = () => {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onProjectUpdated={handleProjectUpdated}
+          loading={loading}
         />
+      );
+    }
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
       );
     }
 

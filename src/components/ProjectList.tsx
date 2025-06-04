@@ -3,17 +3,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../contexts/AuthContext';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  category: string;
-  createdAt: string;
-  userId: string;
-}
+import { Project } from '../hooks/useProjects';
 
 interface ProjectListProps {
   projects: Project[];
@@ -83,11 +73,11 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete, i
                 <span className="font-medium">Category:</span> {project.category}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                <span className="font-medium">Created:</span> {new Date(project.createdAt).toLocaleDateString()}
+                <span className="font-medium">Created:</span> {new Date(project.created_at).toLocaleDateString()}
               </p>
             </div>
 
-            {(isAdmin || project.userId === user?.id) && (onEdit || onDelete) && (
+            {(isAdmin || project.user_id === user?.id) && (onEdit || onDelete) && (
               <div className="flex space-x-2">
                 {onEdit && (
                   <Button

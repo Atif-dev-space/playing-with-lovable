@@ -1,34 +1,25 @@
 
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ProjectList from './ProjectList';
 import ProjectForm from './ProjectForm';
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  category: string;
-  createdAt: string;
-  userId: string;
-}
+import { Project } from '../hooks/useProjects';
 
 interface AdminDashboardProps {
   projects: Project[];
   onEdit: (project: Project) => void;
   onDelete: (projectId: string) => void;
   onProjectUpdated: (project: Project) => void;
+  loading: boolean;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
   projects,
   onEdit,
   onDelete,
-  onProjectUpdated
+  onProjectUpdated,
+  loading
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -37,7 +28,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = filterStatus === 'All' || project.status === filterStatus;
     const matchesPriority = filterPriority === 'All' || project.priority === filterPriority;
     
@@ -57,6 +48,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleCancel = () => {
     setEditingProject(null);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   // Get statistics
   const totalProjects = projects.length;
