@@ -38,6 +38,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -49,6 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
+      console.log('Fetched user profile:', data);
+      
       // Type cast the role to ensure TypeScript compatibility
       return {
         ...data,
@@ -61,6 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -81,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session check:', session);
       setSession(session);
       
       if (session?.user) {
@@ -97,18 +104,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
+      console.log('Attempting login for:', email);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Login error:', error);
         setLoading(false);
         return { error: error.message };
       }
 
+      console.log('Login successful');
       return {};
     } catch (error) {
+      console.error('Login error:', error);
       setLoading(false);
       return { error: 'An unexpected error occurred' };
     }
@@ -117,6 +129,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, name: string) => {
     setLoading(true);
     try {
+      console.log('Attempting registration for:', email);
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -129,18 +143,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
+        console.error('Registration error:', error);
         setLoading(false);
         return { error: error.message };
       }
 
+      console.log('Registration successful');
       return {};
     } catch (error) {
+      console.error('Registration error:', error);
       setLoading(false);
       return { error: 'An unexpected error occurred' };
     }
   };
 
   const logout = async () => {
+    console.log('Logging out');
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

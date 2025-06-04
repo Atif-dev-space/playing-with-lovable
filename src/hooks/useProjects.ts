@@ -28,6 +28,9 @@ export const useProjects = () => {
     }
 
     try {
+      console.log('Fetching projects for user:', user.id, 'role:', user.role);
+      
+      // Let RLS policies handle the filtering based on user role
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -38,6 +41,7 @@ export const useProjects = () => {
         return;
       }
 
+      console.log('Fetched projects:', data);
       setProjects(data || []);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -50,6 +54,8 @@ export const useProjects = () => {
     if (!user) return;
 
     try {
+      console.log('Adding project for user:', user.id);
+      
       const { data, error } = await supabase
         .from('projects')
         .insert([
@@ -66,6 +72,7 @@ export const useProjects = () => {
         return;
       }
 
+      console.log('Added project:', data);
       setProjects([data, ...projects]);
       return data;
     } catch (error) {
@@ -75,6 +82,8 @@ export const useProjects = () => {
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
     try {
+      console.log('Updating project:', id, 'with:', updates);
+      
       const { data, error } = await supabase
         .from('projects')
         .update(updates)
@@ -87,6 +96,7 @@ export const useProjects = () => {
         return;
       }
 
+      console.log('Updated project:', data);
       setProjects(projects.map(p => p.id === id ? data : p));
       return data;
     } catch (error) {
@@ -96,6 +106,8 @@ export const useProjects = () => {
 
   const deleteProject = async (id: string) => {
     try {
+      console.log('Deleting project:', id);
+      
       const { error } = await supabase
         .from('projects')
         .delete()
@@ -106,6 +118,7 @@ export const useProjects = () => {
         return;
       }
 
+      console.log('Deleted project:', id);
       setProjects(projects.filter(p => p.id !== id));
     } catch (error) {
       console.error('Error deleting project:', error);
