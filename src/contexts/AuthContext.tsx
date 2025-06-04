@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       console.log('Attempting login for:', email);
-      
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -118,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       console.log('Login successful');
+      setLoading(false);
       return {};
     } catch (error) {
       console.error('Login error:', error);
@@ -149,6 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       console.log('Registration successful');
+      setLoading(false);
       return {};
     } catch (error) {
       console.error('Registration error:', error);
