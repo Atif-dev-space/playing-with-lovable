@@ -131,6 +131,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       console.log('Attempting registration for:', email);
+
+      const { data: existingUser, error: existingError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (existingError) {
+        console.error('Error checking existing user:', existingError);
+        setLoading(false);
+        return { error: 'An unexpected error occurred' };
+      }
+
+      if (existingUser) {
+        console.log('Email already registered:', email);
+        setLoading(false);
+        return { error: 'Email already registered' };
+      }
       
       const { error } = await supabase.auth.signUp({
         email,
